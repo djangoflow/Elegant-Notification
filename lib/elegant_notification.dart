@@ -36,6 +36,7 @@ class ElegantNotification extends StatefulWidget {
     this.width,
     this.onDismiss,
     this.progressIndicatorBackground = greyColor,
+    this.onNotificationTap,
   }) : super(key: key) {
     notificationType = NotificationType.custom;
 
@@ -115,6 +116,7 @@ class ElegantNotification extends StatefulWidget {
     this.width,
     this.onDismiss,
     this.progressIndicatorBackground = greyColor,
+    this.onNotificationTap,
   }) : super(key: key) {
     notificationType = NotificationType.success;
     progressIndicatorColor = successColor;
@@ -196,6 +198,7 @@ class ElegantNotification extends StatefulWidget {
     this.width,
     this.onDismiss,
     this.progressIndicatorBackground = greyColor,
+    this.onNotificationTap,
   }) : super(key: key) {
     notificationType = NotificationType.error;
     progressIndicatorColor = errorColor;
@@ -277,6 +280,7 @@ class ElegantNotification extends StatefulWidget {
     this.width,
     this.onDismiss,
     this.progressIndicatorBackground = greyColor,
+    this.onNotificationTap,
   }) : super(key: key) {
     notificationType = NotificationType.info;
     progressIndicatorColor = inforColor;
@@ -484,6 +488,9 @@ class ElegantNotification extends StatefulWidget {
   ///by default it's grey
   final Color progressIndicatorBackground;
 
+  /// Tap on whole Notification body
+  final VoidCallback? onNotificationTap;
+
   ///display the notification on the screen
   ///[context] the context of the application
   void show(BuildContext context) {
@@ -615,52 +622,55 @@ class ElegantNotificationState extends State<ElegantNotification>
   Widget build(BuildContext context) {
     return SlideTransition(
       position: offsetAnimation,
-      child: Container(
-        width: widget.width ?? MediaQuery.of(context).size.width * 0.7,
-        height: widget.height ?? MediaQuery.of(context).size.height * 0.12,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.radius),
-          color: widget.background,
-          boxShadow: widget.enableShadow
-              ? [
-                  BoxShadow(
-                    color: widget.shadowColor.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 1,
-                    offset: const Offset(0, 1), // changes position of shadow
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: ToastContent(
-                title: widget.title,
-                description: widget.description,
-                notificationType: widget.notificationType,
-                icon: widget.icon,
-                displayCloseButton: widget.displayCloseButton,
-                closeButton: widget.closeButton,
-                onCloseButtonPressed: () {
-                  widget.onCloseButtonPressed?.call();
-                  closeTimer.cancel();
-                  slideController.reverse();
-                  widget.onDismiss?.call();
-                  widget.closeOverlay();
-                },
-                iconSize: widget.iconSize,
-                action: widget.action,
-                onActionPressed: widget.onActionPressed,
+      child: InkWell(
+        onTap: widget.onNotificationTap,
+        child: Container(
+          width: widget.width ?? MediaQuery.of(context).size.width * 0.7,
+          height: widget.height ?? MediaQuery.of(context).size.height * 0.12,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.radius),
+            color: widget.background,
+            boxShadow: widget.enableShadow
+                ? [
+                    BoxShadow(
+                      color: widget.shadowColor.withOpacity(0.2),
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                      offset: const Offset(0, 1), // changes position of shadow
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: ToastContent(
+                  title: widget.title,
+                  description: widget.description,
+                  notificationType: widget.notificationType,
+                  icon: widget.icon,
+                  displayCloseButton: widget.displayCloseButton,
+                  closeButton: widget.closeButton,
+                  onCloseButtonPressed: () {
+                    widget.onCloseButtonPressed?.call();
+                    closeTimer.cancel();
+                    slideController.reverse();
+                    widget.onDismiss?.call();
+                    widget.closeOverlay();
+                  },
+                  iconSize: widget.iconSize,
+                  action: widget.action,
+                  onActionPressed: widget.onActionPressed,
+                ),
               ),
-            ),
-            if (widget.showProgressIndicator)
-              AnimatedProgressBar(
-                foregroundColor: widget.progressIndicatorColor,
-                duration: widget.toastDuration,
-                backgroundColor: widget.progressIndicatorBackground,
-              ),
-          ],
+              if (widget.showProgressIndicator)
+                AnimatedProgressBar(
+                  foregroundColor: widget.progressIndicatorColor,
+                  duration: widget.toastDuration,
+                  backgroundColor: widget.progressIndicatorBackground,
+                ),
+            ],
+          ),
         ),
       ),
     );
